@@ -70,4 +70,10 @@ public class Circle extends AbstractShape
 	String value = "Circle: center at (" + anchor.x+","+anchor.y+") with radius " + radius;
 	return value;
     }
+
+	@Override
+	public boolean inShape(int x, int y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

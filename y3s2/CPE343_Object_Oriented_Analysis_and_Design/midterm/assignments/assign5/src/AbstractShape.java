@@ -146,5 +146,6 @@ public abstract class AbstractShape
 	}
     }
 
+    public abstract boolean inShape(int x, int y);
 
 }

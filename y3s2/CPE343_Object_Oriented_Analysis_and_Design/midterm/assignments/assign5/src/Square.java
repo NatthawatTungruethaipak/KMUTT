@@ -70,5 +70,11 @@ public class Square extends AbstractShape
 	String value = "Square: upper left at (" + anchor.x+","+anchor.y+") with sides " + oneside;
 	return value;
     }
+
+	@Override
+	public boolean inShape(int x, int y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }

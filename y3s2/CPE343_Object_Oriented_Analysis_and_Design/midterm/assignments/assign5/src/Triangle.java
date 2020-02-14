@@ -124,6 +124,12 @@ public class Triangle extends AbstractShape
 	return buffer.toString();
     }
 
+	@Override
+	public boolean inShape(int x, int y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 
 }
