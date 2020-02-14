@@ -1,0 +1,1571 @@
+# GRS::TLKS.pm
+# perl object for accessing the TLKS DB
+#
+# $Id: TLKS.pm,v 1.6 2004/09/09 18:29:47 rudahl Exp $
+# $Log: TLKS.pm,v $
+# Revision 1.6  2004/09/09 18:29:47  rudahl
+# changed schema of Component
+#
+# Revision 1.5  2004/09/09 17:58:00  rudahl
+# additions and revisions
+#
+# Revision 1.2  2004/08/04 20:46:31  rudahl
+# near-final version of library query fns
+#
+# Revision 1.1  2004/07/22 03:51:47  rudahl
+# initial from moochie
+#
+
+package TLKS;
+require Exporter;
+use strict;
+use lib ("/var/www/html/KandS") ;
+use lib ("/usr/local/bin") ;
+use GRS::DB_DBI_Access;
+use CGI qw(param);
+
+my @ISA	=qw(Exporter);
+my @EXPORT	=qw(new connect getErr getErrStr findWord getKey getWordInfo);
+
+=head1 TLKS Library
+
+=head2 Introduction
+
+The TLKS database, as a relational database, consists of numerous
+tables.  Some of these tables are called I<simple> because they
+contain only I<user data>, data which is important to the user (plus
+possibly local keys and timestamps), but no I<foreign keys>. Because
+such tables contain no foreign keys, each of them is independent of
+the remainder of the database. Additions and modifications (but not
+deletions) in these tables can be made independently of other database
+tables.
+
+Other tables in the database contain a mix of user data plus foreign
+keys or, in some cases, may contain only local and foreign keys. These
+tables therefore have dependencies on other tables in the
+database. Changes to these tables require verifying or changing data
+in other tables as well.
+
+The TLKS library is intended to insulate the applications programmer
+from having to know and maintain these relationships within the
+database. It also serves to protect the database structure against
+errors in the applications software.
+
+It should be noted that much of the effect of the TLKS library could
+alternatively be obtained by using stored procedures in the database
+system. Stored procedures however are notoriously database-specific.
+
+=head2 User Guide
+
+A program which uses the TLKS library must include the following
+statements (or their equivalents) before any other library functions
+are called:
+
+    use strict;
+    use TLKS;
+    my $tlks = TLKS->new();
+    my $err = $tlks->connect(username);
+
+The program should check that the B<connect()> call was successful
+and exit with an error if it was not. 
+
+After this sequence has successfully completed, all library
+functions can be invoked by using B<$tlks> as the handle, just
+as shown with the B<connect()> statement.
+
+=head3 Miscellaneous Functions
+
+You can always find a message (in English only) explaining the
+most recent library or database error by calling
+
+    my $err = $tlks->getErrStr()
+
+There is not currently any internationalization of the error
+messages.
+
+You can reset (clear out) that information by calling
+
+    $tlks->clearErrStr();
+
+B<This list will be expanded.>
+
+=head3 Functions for Simple Tables
+
+The library B<may> include the following seven functions for each
+simple table.  Note that the naming patterns shown here may not have
+ben followed exactly; you should check the detailed description for
+each function.
+
+The word B<may> indicates that not all of these functions are actually
+included in the library for each simple table. There are three reasons
+which a function may not be included:
+
+=over 4
+
+=item 
+
+It is too simple to be needed. Your Perl program can simple invoke
+some Javascript function directly, because no database access is required.
+
+=item 
+
+There does not appear to be any situation when it would be
+needed. If you disagree, please let me know.
+
+=item 
+
+I haven't had time yet to include it. Maybe I think you will not
+actually be using it. If you need it, please let me know.
+
+=back
+
+The functions which B<might> be included (where B<XXX> is some table
+name) are:
+
+=over 4
+
+=item showAddXXXForm()
+
+Generate a form in HTML as a Javascript function call to
+Javascript B<showAddXXXForm()>. The Javascript function should
+show some form which allows the user to supply the needed information.
+In doing so, the HTML B<< <input name=paramname> > fields should use
+the paramnames required by B<addXXXFromForm()>.
+
+   usage: showAddXXXForm bDebug -- 
+           if 'bDebug' is true, function outputs debugging information
+
+Note: In many cases this function is unnecessary in the TLKS library
+      because your application program can just call the Javascript
+      function directly. However, if the form uses a drop-down list of
+      choices from the database (such as a list of languages), then
+      you need to use the TLKS library.
+
+=item showQueryXXXForm()
+
+Generate a query form in HTML as a Javascript function call to
+Javascript B<showQueryXXXForm()> The Javascript function should show
+some form which allows the user to supply the needed information.  In
+doing so, the HTML B<< <input name=paramname> > fields should use the
+paramnames required by B<addXXXFromForm()>. Actually, this will
+frequently be almost the same as B<showAddXXXForm()>.
+
+   usage: showQueryXXXForm bDebug -- 
+           if 'bDebug' is true, function outputs debugging information
+
+Note: In many cases this function is unnecessary in the TLKS library
+      because your application program can just call the Javascript
+      function directly. However, if the form uses a drop-down list of
+      choices from the database (such as a list of languages), then
+      you need to use the TLKS library.
+
+=item showEditXXXForm()
+
+Generate a query form in HTML as a Javascript function call to
+    Javascript B<showEditXXXForm()>
+
+   usage: showEditXXXForm bDebug XXXkey -- 
+           if 'bDebug' is true, function outputs debugging information
+           'XXXkey' must be a key to some record in the XXX table,
+           which was found by an earlier query.
+
+Note: In many cases this function is not present in the TLKS library
+      because it seems unlikely to be needed at this time.
+
+=item addXXXFromForm()
+
+Add a new record into XXX table based on infomation sent from the
+B<showAddXXXForm()> form.
+
+    usage: addXXXFromForm bDebug --
+           if 'bDebug' is true, function outputs debugging information
+           Form must return parameters named:
+
+At this point, the detailed documentation will list exactly which
+parameter names (that is, HTML B<< <input name=paramname> >) must or
+may be supplied by your form.
+
+           This function does no screen IO 
+           Returns error message (in English) or an empty string
+
+=item queryXXXFromForm()
+
+Search table XXX for records which match infomation sent from the
+B<showQueryXXXForm()> form.
+
+    usage: queryXXXFromForm bDebug --
+           if 'bDebug' is true, function outputs debugging information
+           Form must return parameters named:
+
+At this point, the detailed documentation will list exactly which
+parameter names (that is, HTML B<< <input name=paramname> >) must or
+may be supplied by your form. Note the important difference between
+B<must> and B<may>.
+
+           This function does no screen IO 
+           Returns (possibly empty) array.
+
+Note that this function may return many records. Note also that if
+this function returns an empty array, it might be because of an error,
+or it might be because nothing was found. Use B<getErrStr()> to find out
+whether there was an error.
+
+=item editXXXFromForm()
+
+Update a record in table XXX with infomation sent from the
+B<showEditXXXForm()> form.
+
+    usage: editXXXFromForm bDebug --
+           if 'bDebug' is true, function outputs debugging information
+           Form must return parameters named:
+
+At this point, the detailed documentation will list exactly which
+parameter names (that is, HTML B<< <input name=paramname> >) must or
+may be supplied by your form. Note the important difference between
+B<must> and B<may>. However, the form must B<always> return the key
+to the record being updated.
+
+           This function does no screen IO 
+           Returns error message (in English) or an empty string
+
+=item getXXXAsOptions()
+
+Query the XXX table records, and return the results
+formatted as a list (string) of options suitable to be included in
+an HTML B<< <select> > statement. 
+
+    usage: getXXXAsOptions bDebug paramter -- string
+           if 'bDebug' is true, function outputs debugging information
+           'parameter' typically limits the set of returned results, for
+                  example to a specific language.
+
+As an example, your Perl code might have:
+
+    my $LangList = $tlks->getLanguagesAsOptions(1);
+    if ($LangList eq '')
+        {
+	my $err = $tlks->getErrStr();
+	print "<h4>$err</h4>\n";
+        }
+    my $POSList = $tlks->getPartsOfSpeechAsOptions($langCode);
+    if ($POSList eq '')
+        {
+	my $err = $tlks->getErrStr();
+	print "<h4>$err</h4>\n";
+        }
+    print "<SCRIPT>showSearchForm('$POSList','$LangList');</SCRIPT>\n";
+
+Then, the javascript code which implements B<showSearchForm()> might have:
+
+    function showSearchForm(posList, langList)
+       {
+       ...
+       document.writeln('<SELECT name="Language">+langList+'<SELECT>');
+       ...
+       }
+
+Note: In most cases you will not need to use this function directly, since
+      it will already be included in some B<show....Form()> function. Also, this
+      function makes sense only for tables which can conveniently return 
+      options suitable for a dropdown lost.
+
+=back
+
+=head3 Functions for Complex Tables
+
+B<To be supplied>
+
+=cut
+
+sub new
+    {
+    my $self = {};
+    $$self{dbDbi} = new GRS::DB_DBI_Access;
+    $$self{errStr} = '';
+    return bless $self;
+    }
+
+=head2 connect()
+
+ connect to TLKS db
+ This sets up the DB connection but does no screen IO.
+ usage: connect userID -- string 
+ return '' or error string
+
+=cut
+
+sub connect
+    {
+    my ($self,$user) = @_;
+    my %pw = ( 'TLKSEditor' => 'Teditor8',
+	       'TLKSAdmin' => 'Tadmin9',
+	       'TLKSUser' => '');
+    my $dbDbi = $$self{dbDbi};
+    my $db = 'TLKS';
+    $dbDbi->connectMysql($db,'TLKSUser',''); # read-only
+    my $err = $dbDbi->getDBErrorName();
+    my $errStr = '';
+    if ($err ne '')
+        {
+	$$self{errStr} .= "Error: '$err' on connect with user='TLKSUser'";
+	return "$$self{errStr}";
+        }
+  #       print "<h4>connecting2</h4>";
+    my $sql = "select Password,Name from User where Name='$user';";
+    my @users = $dbDbi->execSqlGetResults($sql);
+    $err = $dbDbi->getDBErrorName();
+    $dbDbi->close();
+    my $uCount = @users;
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting user names from DB";
+	return "$$self{errStr}";
+        }
+  #       print "<h4>connecting3 uCount=$uCount user='$user'</h4>";
+    if ($uCount != 2)
+        {
+	$$self{errStr} .= "Error: user '$user' not found in DB";
+	return "$$self{errStr}";
+        }
+  #        print "<h4>connecting5</h4>";
+  #        print "<h4>pw='$users[1]', count=$uCount, user='$user'</h4>";
+    my $DBuser = ($users[1] =~ /^\s+[|]/) ? 'TLKSUser' : 'TLKSEditor';
+   #       print "<h4>DBuser='$DBuser'</p4>\n";
+    my $DBpw = $pw{$DBuser};
+    $dbDbi->connectMysql($db,$DBuser,$DBpw);
+    $err = $dbDbi->getDBErrorName();
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' on connect to '$DBuser','$DBpw'"; 
+	return "$$self{errStr}";
+        }
+    $$self{errStr} = '';
+    return '';
+    }
+
+sub getErr
+    {
+    my $self = shift;
+    return 1;
+    }
+
+=head2 getErrStr()
+
+Return a string which describes the most recent error
+
+=cut
+
+sub getErrStr
+    {
+    my $self = shift;
+    return $$self{errStr};
+    }
+
+=head2 clearErrStr()
+
+Clear the string which describes the most recent error
+
+=cut
+
+sub clearErrStr
+    {
+    my $self = shift;
+    $$self{errStr} = '';
+    }
+
+=head2 getLastKey()
+
+ Get the autoincrement key value of the latest insert operation
+ in the specified table. (This is claimed to work even in a
+ multi-user environment.)
+ This is a utility function with no screen IO
+  usage: getLastKey tablename -- keynum or -1
+
+=cut
+
+sub getLastKey
+    {
+    my ($self,$table) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $key = -1;
+    my $lsql = "select LAST_INSERT_ID() from $table;";
+    my @lres = $dbDbi->execSqlGetResults($lsql);
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @lres - 1;
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting $table from DB";
+#	$$self{errStr} .= " (getLatestKey cmd='$lsql')" if ($bDebug);
+        }
+    else
+        {
+	$key = 0 + $lres[0];
+	}
+    return $key;
+    }
+
+=head2 getKey()
+
+ get from DB the key which corresponds to the specified column
+ in the specified table.
+ return key as non-empty string, or empty => error
+ This is a utility function which does no screen IO
+ usage: getKey table column op value keycolumn bDebug -- key
+
+=cut
+
+sub getKey
+    {
+    my ($self,$table,$column,$op,$value,$keycolumn,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $lsql = "select $keycolumn from $table where $column $op $value;";
+#    print "<pre>getKey cmd='$lsql'</pre>\n if ($bDebug)";
+    my @lres = $dbDbi->execSqlGetResults($lsql);
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @lres - 1;
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting $table from DB";
+	$$self{errStr} .= " (getKey cmd='$lsql')" if ($bDebug);
+	return '';
+        }
+    if ($uCnt != 1)
+        {
+	$$self{errStr} = "Error: getting $table from DB: found $uCnt matches";
+	$$self{errStr} .= " (getKey cmd='$lsql')" if ($bDebug);
+	return '';
+        }
+    chomp(my $res = $lres[1]);
+    print "<pre>result = $uCnt items: '$res' (getKey cmd='$lsql')</pre>" 
+	if ($bDebug);
+    return $res;
+    }
+
+=head2 getReferringRecs()
+
+ get from DB all records in specified table which apply to the specified 
+ word (actually, needn't be a word).
+ return result as an array (poss. empty) of keys to the specified table
+ This is a utility function which does no screen IO
+ usage: getReferringRecs table column op value keycolumn languageCode -- array
+ (if languageCode = '', ignore it 
+     else require it match what is specified by 'Table.Language')
+
+=cut
+
+sub getReferringRecs
+    {
+    my ($self,$table,$column,$op,$value,$keycolumn,$language) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $sql = "select $keycolumn from $table where $column $op $value";
+    $sql .= " and Language = '$language'" if ($language ne '');
+    $sql .= ";";
+    my @res = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @res - 1;
+    my @ret;  # array of keys
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting $table from DB";
+	return @res;
+        }
+#    print "<h4> got $uCnt items</h4>\n";
+
+    for (my $j=1; $j < @res ; $j++)
+        {
+	push @ret,($res[$j]);
+        }
+    return @ret;
+    }
+
+=head2 getLanguageKey()
+
+ get from DB the key of the language which matches either on Name or
+ LocalName or even on the key itself.
+ return key as non-empty string, or empty => error
+ This is a utility function which does no screen IO
+ usage: getLanguageKey name -- key | ''
+
+=cut
+
+sub getLanguageKey
+    {
+    my ($self,$name) = @_;
+	    # accept if matches either Name or LocalName
+    my $nkey = getKey($self,'Language','Name','=',$name,'LanguageCode',0);
+    my $lkey = getKey($self,'Language','LocalName','=',$name,'LanguageCode',0);
+    my $ckey = getKey($self,'Language','LanguageCode','=',
+		      $name,'LanguageCode',0);
+    my $key = ($nkey ne '') ? $nkey : ($lkey ne '') ? $lkey : $ckey;
+    return $key;
+    }
+
+=head2 getLanguages()
+
+ get from DB all available languages as array
+ This is a utility function which does no screen IO
+ usage: getLanguages -- array of results, each as : abbrev | ISOname | localname
+
+=cut
+
+sub getLanguages
+    {
+    my ($self) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $sql = "select * from Language;";
+    my @res = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @res - 1;
+    my @ret;  # array of results
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting Languages from DB";
+	return @res;
+        }
+    for (my $j=1; $j < @res ; $j++)
+        {
+	push @ret,($res[$j]);
+        }
+    return @ret;
+    }
+
+=head2 getLanguagesAsOptions()
+
+ get from DB all available languages as string suitable for HTML <SELECT>
+ This is a utility function which does no screen IO
+ usage: getLanguagesAsOptions flag -- string of results or ''
+ if 'flag' is true use the local name of the language else the ISO name
+
+=cut
+
+sub getLanguagesAsOptions
+    {
+    my ($self,$flag) = @_;
+    my @res = getLanguages($self);
+    my $ret = '';
+    my $opt = ($flag) ? 2 : 1;
+    if (@res > 0)
+        {
+	for (my $j=0; $j < @res ; $j++)
+            {
+	    $res[$j] =~ s/^\s+//;
+	    chomp($res[$j]);
+	    my @flds = split /\s*[|]\s*/,$res[$j];
+	    $flds[$opt] = $flds[1] if (($flds[$opt] =~ /^\s*$/) && ($opt > 1));
+	    $ret .= "<OPTION value=\"$flds[0]\">$flds[$opt]"; 
+            }
+        }
+    return $ret;
+    }
+
+=head2 getPartsOfSpeech()
+
+ get from DB all available parts of speech as array
+ This is a utility function which does no screen IO
+ usage: getPartsOfSpeech languageCode -- array of results, each as : abbrev | name
+
+=cut
+
+sub getPartsOfSpeech
+    {
+    my ($self,$lang) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $sql = "select PartOfSpeechCode,Description from PartOfSpeechLanguage ";
+    $sql .= " where LanguageCode='$lang';";
+    my @res = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @res - 1;
+    my @ret;  # array of results
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting Languages from DB";
+	return @res;
+        }
+    for (my $j=1; $j < @res ; $j++)
+        {
+	push @ret,($res[$j]);
+        }
+    return @ret;
+    }
+
+=head2 getPartsOfSpeechAsOptions()
+
+ get from DB all available PartsOfSpeech as string suitable for HTML <SELECT>
+ This is a utility function which does no screen IO
+ usage: getPartsOfSpeechAsOptions langCode -- string of results or ''
+
+=cut
+
+sub getPartsOfSpeechAsOptions
+    {
+    my ($self,$lang) = @_;
+    my @res = getPartsOfSpeech($self,$lang);
+    my $ret = '<OPTION>*';
+    if (@res > 0)
+        {
+	for (my $j=0; $j < @res ; $j++)
+            {
+	    $res[$j] =~ s/^\s+//;
+	    chomp($res[$j]);
+	    my @flds = split /\s*[|]\s*/,$res[$j];
+	    $ret .= "<OPTION value=\"$flds[0]\">$flds[1]"; 
+            }
+        }
+    return $ret;
+    }
+
+=head2 getColumnLabel()
+
+ get from DB a display column label for the specified column
+ This is a utility function which does no screen IO
+ usage: getColumnLabel langCode columnname table client -- displaystring
+   'table' needs to be other than '' only if there are several tables with
+    the same column name and those columns are all in the LabelNames DB
+ In case of error, just return the columnname
+
+=cut
+
+sub getColumnLabel
+    {
+    my ($self,$lang,$column,$table,$client) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $sql = "select DisplayName from LabelNames where LanguageCode='$lang'";
+    $sql .= " and TableName='$table'" if ($table ne ''); 
+    $sql .= " and LabelName='$column' and Client='$client';";
+    my @res = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    my $ret;  # result
+    if (($err ne '') || (@res < 2))
+        {
+	$$self{errStr} = "Error: '$err' getting ColumnLabel from DB";
+	$ret = $column;
+        }
+    else
+        {
+	chomp ($ret=$res[1]);
+        }
+    return $ret;
+    }
+
+=head2 findWord()
+
+ find all records in DB which match the non-empty elements of string 'args'
+ which must have no commas except between name='value' pairs
+ The only permitted names are: spelling,translation,translator,
+				partofspeech or partofspeechcode,
+                               component,synonym,
+				language (which can be the code or the name)
+ note that all values must be single-quoted.
+ return array of WordKeys
+ This is a utility function which does no screen IO
+ usage: findWord argumentString bDebug -- '' or array of results
+
+=cut
+
+sub findWord
+    {
+    my ($self,$args, $bDebug) = @_;
+    my @args = split /[,=]/,$args;
+    my %args = @args;
+    print "<pre>findWord args='@args'</pre>\n" if ($bDebug);
+    my $dbDbi = $$self{dbDbi};
+    my $tables = "Word";
+    my $where = '';
+    if ((defined $args{translation}) && ($args{translation} ne "''"))
+	{
+	$where .= "Translation.Translation = $args{translation}";
+	$where .= " and Translation.Word = Word.WordKey";
+	$tables .= ",Translation";
+        }
+    if ((defined $args{translator}) && ($args{translator} ne "''"))
+        {
+	my $key = 0+getKey($self,'Translator','Name','=',
+			   $args{translator},'TranslatorKey',$bDebug);
+	return '' if ($key == 0);
+	$where .= " and " if ($where ne '');
+	$where .= "Translation.Translator = $key" ;
+	$where .= " and Translation.Word = Word.WordKey";
+	$tables .= ",Translator";
+        }
+#    if ((defined $args{speaker}) && ($args{speaker} ne "''"))
+#        {
+#	my $key = 0+getKey($self,'Speaker','Name','=',
+#				$args{speaker},'SpeakerKey');
+#	return '' if ($key == 0);
+#	$where .= " and " if ($where ne '');
+#	$where .= "Pronunciation.Speaker = $key" ;
+#	$tables .= ",Speaker";
+#        }
+    if ((defined $args{language}) && ($args{language} ne "''"))
+        {
+	    # accept if matches either Name or LocalName
+	my $key = getLanguageKey($self,$args{language});
+	return '' if ($key eq '');
+	$where .= " and " if ($where ne '');
+	$where .= "Translation.Language = '$key'" ;
+	$tables .= ",Translation" if ($tables !~ /,Translation/);
+        }
+    if ((defined $args{partofspeechcode}) && ($args{partofspeechcode} ne "''"))
+        {
+	$where .= " and " if ($where ne '');
+	$where .= "Word.PartOfSpeechCode = $args{partofspeechcode}"; 
+        }
+    elsif ((defined $args{partofspeech}) && ($args{partofspeech} ne "''"))
+        {
+	my $key = getKey($self,'PartOfSpeechLanguage',
+			  'Description','=',$args{partofspeech},
+			  'PartOfSpeechCode',$bDebug);
+	return '' if ($key eq '');
+	$where .= " and " if ($where ne '');
+	$where .= "Word.PartOfSpeechCode = '$key'"; 
+        }
+    if ((defined $args{synonym}) && ($args{synonym} ne "''"))
+        {
+	my $wordkey = 0+getKey($self,'Word','Spelling','=',
+				$args{synonym},'WordKey',$bDebug);
+	return '' if ($wordkey == 0);
+	my $key = 0+getKey($self,'Synonym','SynonymWord','=',
+				$wordkey,'Word',$bDebug);
+	return '' if ($key == 0);
+	$where .= " and " if ($where ne '');
+	$where .= "Word.WordKey = $key";
+        }
+    if ((defined $args{component}) && ($args{component} ne "''"))
+        {
+#	my $wordkey = 0+getKey($self,'Word','Spelling','=',
+#			       $args{component},'WordKey',$bDebug);
+#	return '' if ($wordkey == 0);
+	my $key = 0+getKey($self,'Component','Spelling','=',
+			   $args{component},'Word',$bDebug);
+	return '' if ($key == 0);
+	$where .= " and " if ($where ne '');
+	$where .= "Word.WordKey = $key";
+        }
+    if ((defined $args{spelling}) && ($args{spelling} ne "''"))
+        {
+	$where .= " and " if ($where ne '');
+	$where .= "Word.Spelling = $args{spelling}";
+        }
+    my $sql = "select DISTINCT Word.WordKey from $tables\n    where $where;";
+#    my $sql = "select * from $tables where $where;";
+    print "<pre>findWord about to exec '$sql'</pre>\n" if ($bDebug);
+    my @res = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @res - 1;
+    print "<pre>findWord err='$err' count=$uCnt</pre>\n" if ($bDebug);
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting words from DB";
+	return 0;
+        }
+    if ($uCnt < 1)
+        {
+	$$self{errStr} = "Error: getting words from DB: found no matches";
+	return 0;
+        }
+    return @res;
+    }
+
+=head2 getWordInfo()
+    
+ retrieve all useful info about a word based on its WordKey
+ This is a utility function which does no screen IO
+ usage: getWordInfo WordKey desired-Language bDebug -- str | ''
+
+=cut
+
+sub getWordInfo
+    {
+    my ($self,$WordKey,$language,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $langkey = getLanguageKey($self,"'$language'");
+    my $syn = '--';  # resulting blank-sep. list of synonyms
+    my $comp = '--';  # resulting blank-sep. list of components
+    my $explain = '--';  # resulting explanation if any
+    my @syn = getReferringRecs($self,'Synonym','SynonymWord',
+			       '=',$WordKey,'Word','');
+    my $uCnt = @syn;
+#    print "<pre>   found $uCnt synonyms</pre>\n" if ($bDebug);
+    if (@syn > 0)
+        {
+	my $where = '';
+	for (my $j=0; $j < @syn; $j++)
+	    {
+	    my $w = 0 + $syn[$j];
+	    $where .= " or " if ($where ne '');
+	    $where .= "WordKey = $w";
+	    }
+	my $sql = "select Spelling from Word where $where;";
+	@syn = $dbDbi->execSqlGetResults("$sql");
+	my $err = $dbDbi->getDBErrorName();
+	if ($err ne '')
+            {
+	    $$self{errStr} = "Error: '$err' getting synonyms from DB";
+	    return '';
+            }
+	for (my $j=1; $j <= @syn; $j++)
+	    {
+	    chomp($syn[$j]);
+	    $syn .= " " if ($syn ne '');
+	    $syn .= $syn[$j];
+	    }
+        }
+    my @comp = getReferringRecs($self,'Component','Word',
+			       '=',$WordKey,'Word','');
+    if (@comp > 0)
+        {
+	my $where = '';
+	for (my $j=0; $j < @comp; $j++)
+	    {
+	    my $w = 0 + $comp[$j];
+	    $where .= " or " if ($where ne '');
+	    $where .= "WordKey = $w";
+	    }
+	my $sql = "select Spelling from Word where $where;";
+	@comp = $dbDbi->execSqlGetResults("$sql");
+	my $err = $dbDbi->getDBErrorName();
+	if ($err ne '')
+            {
+	    $$self{errStr} = "Error: '$err' getting components from DB";
+	    return '';
+            }
+	for (my $j=1; $j <= @comp; $j++)
+	    {
+	    chomp($comp[$j]);
+	    $comp .= " " if ($comp ne '');
+	    $comp .= $comp[$j];
+	    }
+        }
+#    print "<pre>   found $uCnt components</pre>\n" if ($bDebug);
+    my $sql = "select Explanation from Explanation where ";
+    $sql .= "Word = $WordKey and Language = '$langkey';";
+    my @exp = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting explanation from DB";
+	return '';
+        }
+    $explain = $exp[1] if (@exp > 1);
+    my $sql = "select Word.wordKey,Word.Spelling,Translation.Translation,";
+    $sql .= "PartOfSpeechLanguage.Description";
+    my $tables = "Word,Translation,PartOfSpeechLanguage";
+#    $sql .= "Pronunciation.Pronunciation,Pronunciation.Speaker,";
+    my $where = " where Word.WordKey = $WordKey";
+    $where .= " and Word.WordKey = Translation.Word";
+    $where .= " and Translation.Language = '$langkey'";
+    $where .= " and PartOfSpeechLanguage.LanguageCode = '$langkey'";
+    $where .= " and PartOfSpeechLanguage.PartOfSpeechCode = Word.PartOfSpeechCode";
+#    $where .= "Word.Spelling = $args{word}" 
+#	if ((defined $args{word}) && ($args{word} ne ''));
+#    $where .= " and " if ($where ne '');
+#    $where .= "Translation.Translation = $args{translation}" 
+#	if ((defined $args{translation}) && ($args{translation} ne ''));
+#    $where .= " and " if ($where ne '');
+#    $where .= "Translation.Translator = $args{translator}" 
+#	if ((defined $args{translator}) && ($args{translator} ne ''));
+#    $where .= " and " if ($where ne '');
+    $sql .= "\n   from $tables $where ;";
+    print "<pre>getWordInfo about to exec '$sql'</pre>\n" if ($bDebug);
+    my @res = $dbDbi->execSqlGetResults("$sql");
+    my $err = $dbDbi->getDBErrorName();
+    my $uCnt = @res - 1;
+    if ($err ne '')
+        {
+	$$self{errStr} = "Error: '$err' getting words from DB";
+	return 0;
+        }
+    if ($uCnt < 1)
+        {
+	$$self{errStr} = "Error: getting words from DB: found no matches";
+	return 0;
+        }
+    for (my $j=0; $j<@res; $j++)
+        {
+	chomp($res[$j]);
+	$res[$j] .= " | Synonyms | Components | Explanation" if ($j == 0);
+	$res[$j] .= " | $syn | $comp | $explain" if ($j > 0);
+        }
+    return @res;
+    }
+
+=head2 getWordInfoAsHTML()
+
+ create HTML/Javascript invocation to show info about specified word
+ Note this may retrieve several records:
+    Record 0 is the column headers
+ If bDoTableHeader assume this is first invocation and output call
+ to Javascript showWordResultHeader fn to show the table header (rec0)
+ and then Javascript showWordResultItem() to show each record.
+ usage: getWordInfoAsHTML wordno language bDoTableHeader bDebug -- array
+
+=cut
+
+sub getWordInfoAsHTML
+    {
+    my ($self,$wordno,$lang,$client,$bDoTableHeader,$bDebug) = @_;
+    my @info = getWordInfo($self,$wordno,$lang,$bDebug);
+    my $uCnt = @info - 1;
+    if ((@info == 0) || ($info[0] eq ''))
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    elsif ($uCnt == 0)
+        {
+	print "<h4>No matching info found for word $wordno</h4>\n";
+        }
+    else
+        {
+	print "<pre>GetWordInfoAsHTML result ($uCnt items):\n" if ($bDebug);
+	if ($bDoTableHeader)
+	    {
+	    my @hdrs = getAllColumnLabelsHeaders($self,$lang,
+						 $client,$info[0],$bDebug);
+	    print "<pre>Form result ($uCnt items):\n" if ($bDebug);
+	    print "<SCRIPT>showWordResultHeader('$uCnt',";
+	    for (my $j=0; $j<@hdrs; $j++)
+	        {
+		print "'$hdrs[$j]'";
+		print "," if ($j < @hdrs-1);
+	        }
+	    print ");</SCRIPT>\n";
+	    }
+	for (my $j=1; $j<=$uCnt; $j++)
+            {
+	    my $rec = $info[$j];
+	    $rec =~ s/^\s+//;
+	    $rec =~ s/\s+$//;
+	    my @cols = split /\s*[|]\s*/,$rec;
+	    chomp($wordno);
+	    print "<SCRIPT>showWordResultItem(";
+	    for (my $j=0; $j<@cols; $j++)
+	        {
+		print "'<TD align=center>$cols[$j]</TD>'";
+		print "," if ($j < @cols-1);
+	        }
+	    print ");</SCRIPT>\n";
+#	    print "   $j: $info[$j]\n";
+            }
+	print "</pre>\n";
+        }
+    }
+
+=head2 showQueryAsHTML()
+
+ generate a query form in HTML as a Javascript function call to
+ Javascript showSearchForm();
+ usage: showQueryAsHTML lang bDebug -- 
+
+=cut
+
+sub showQueryAsHTML
+    {
+    my ($self,$langCode,$bDebug) = @_;
+    my $LangList = getLanguagesAsOptions($self,1);
+    if ($LangList eq '')
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    my $POSList = getPartsOfSpeechAsOptions($self,$langCode);
+    if ($POSList eq '')
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    print "<SCRIPT>showSearchForm('$POSList','$LangList');</SCRIPT>\n";
+    }
+
+=head2 findWordFromForm()
+
+ like findWord() but handles parsing the values sent from HTML form
+
+=cut
+
+sub findWordFromForm
+    {
+    my ($self,$bDebug) = @_;
+    my $spelling = param('Spelling');
+    my $translation = param('Translation');
+    my $component = param('Component');
+    my $synonym = param('Synonym');
+    my $partofspeechcode = param('PartOfSpeechCode');
+    my $language = param('Language');
+    my $search = "spelling='$spelling'," if ($spelling ne '');
+    $search .= "translation='$translation'," if ($translation ne '');
+    $search .= "component='$component'," if ($component ne '');
+    $search .= "synonym='$synonym'," if ($synonym ne '');
+    $search .= "language='$language'," if ($language ne ''); 
+    $search .= "partofspeechcode='$partofspeechcode'" 
+	if ($partofspeechcode !~ /^[*]?$/);
+    my @res = findWord($self,$search,$bDebug);
+    my $rescount=@res-1;
+    print "<pre>findWordFromForm of '$search' got $rescount results</pre>"
+	if ($bDebug);
+    return @res;
+    }
+
+=head2 getAllColumnLabelsHeaders()
+
+ return an array of HTML table headers (<TH>) corresponding
+ to each name in '$rec0', in the same order as rec[0].
+ (rec[0] is the names of the columns, which is the first record
+ retrieved in a DB search.)
+ This is a utility function which does no screen IO
+  usage: getAllColumnLabelsHeaders rec[0] -- array-of-labels
+
+=cut
+
+sub getAllColumnLabelsHeaders
+    {
+    my ($self,$langCode,$client,$rec0,$bDebug) = @_;
+    $rec0 =~ s/^\s+//;
+    $rec0 =~ s/\s+$//;
+    my @ret;
+    my @cols = split /\s*[|]\s*/,$rec0;
+    if ($bDebug)
+        {
+	my $uCnt = @cols;
+	print "processing hdr line '$rec0' got $uCnt labels\n";
+        }
+    foreach my $r (@cols)
+        {
+	my $label = getColumnLabel($self,$langCode,$r,'',$client);
+	push @ret,("<TH>$label</TH>");
+        }
+    return @ret;
+    }
+
+=head2 showWordInfoFromForm()
+
+ Parse form data returned from browser and send a response
+ to the browser in the form of an invocation of Javascript functions.
+ This function calls the TLKS library functions 
+ 'findWordFromForm' (which finds a list or word keys 
+    based on the submitted form)
+ and 'getWordInfoAsHTML' (which finds the word info and displays
+    it using javascript).
+
+=cut
+
+sub showWordInfoFromForm
+    {
+    my ($self,$langCode,$client,$bDebug) = @_;
+    my @info = findWordFromForm($self,$bDebug);
+    my $uCnt = @info-1;
+    if ((@info == 0) || ($info[0] eq ''))
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    elsif ($uCnt == 0)
+        {
+	print "<h4>No matching info found for search.</h4>\n";
+        }
+    else
+        {
+	for (my $j=1; $j<=$uCnt; $j++)
+            {
+	    print "   $j: $info[$j]\n" if ($bDebug);
+	    getWordInfoAsHTML($self,$info[$j],'eng',
+			      $client,($j==1),$bDebug);
+            }
+	print "</pre>\n";
+        }
+    }
+
+
+############################################################################
+#
+# insert functions
+#
+############################################################################
+
+# Utility (internal) functions to retrieve and verify a form parameter.
+# This is a utility function which does no screen IO
+# usage: get_checkParam paramName default verify bDebug -- paramVal 
+# verify lists $p's which must be valid in DB
+# value is either TableName or TableName:ColumnName or
+# list of permitted values in form "=A,B,C"
+#   sets $$self{errStr} if error
+sub get_checkParam
+    {
+    my ($self,$p,$default,$verify,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $pVal = param($p);
+    print "    get_checkParam: $p = $pVal\n"
+	if ($bDebug);
+    if ((! defined $pVal) || ($pVal eq ''))
+        {
+	if ($default ne '')
+	    { $pVal = $default; }
+	else
+	    { $$self{errStr} = "Missing '$p'"; }
+        }
+    if (($$self{errStr} eq '') && ($verify ne ''))
+        {
+	if ($verify =~ /^[=](.*)/)
+	    {
+	    my $list = $1;
+	    my @poss = split(/,\s*/,$list);
+	    $$self{errStr}="Value $pVal for $p not in permitted range '$list'";
+	    foreach my $po (@poss)
+	        {
+		$$self{errStr} = '', last if ($po eq $pVal); 
+	        }
+	    }
+	else
+            { # this assumes non-numeric form of verify
+	    my $table = $verify;
+	    my $column = $p;
+	    if ($verify =~ /^([^:]*):(.*)/)
+	        {
+		$table = $1;
+		$column = $2;
+	        }
+	    my $sql = "select $p from $table where $column eq '$pVal';";
+	    my @lres = $dbDbi->execSqlGetResults($sql);
+	    my $sqerr = $dbDbi->getDBErrorName();
+	    my $uCnt = @lres - 1;
+	    if ($sqerr ne '')
+	        {
+		$$self{errStr}="Error retrieving from database table $verify";
+	        }
+	    elsif ($uCnt != 1) 
+	        {
+		$$self{errStr} = "Value $pVal for $p not found in database table $verify";
+	        }
+	    }
+        }
+    return $pVal;
+    }
+
+# Utility (internal) functions to insert something into DB.
+# This is a utility function which does no screen IO
+# doesn't do it if already an error
+# usage: insertDB tableName nameStr valueStr bDebug -- errStr
+sub insertDB
+    {
+    my ($self,$table, $nameStr, $valueStr, $bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $err = $$self{errStr};
+    if ($$self{errStr} eq '')
+        {
+	my $sql = "insert into $table ($nameStr) values($valueStr);";
+	$dbDbi->execSqlCommand($sql);
+	my $sqerr = $dbDbi->getDBErrorName();
+	if ($sqerr ne '')
+	    {
+	    $$self{errStr} = "Error: '$sqerr' inserting into $table";
+	    $$self{errStr} .= " (getKey cmd='$sql')" if ($bDebug);
+	    $err = "Error $sqerr inserting into database table $table";
+	    }
+        }
+    return $err;
+    }
+
+=head2 addLabelFromForm()
+
+ Add a new record into LabelNames table based on info sent from form
+ usage: addLabelFromForm bDebug --
+ Form must return parameters named:
+	LabelName 	usually should be some column name in DB
+	LanguageCode 	3-letter key to Language table
+	Client 		'ajarn' (for Kurt and Sally) or 'team3'
+	TableName 	optional
+	DisplayName 	what you want the label to be, in specified Language
+ This function does no screen IO
+ Returns error message (in english) or empty string
+
+=cut
+
+sub addLabelFromForm
+    {
+    my ($self,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $table = 'LabelNames';
+    my @params = qw(LabelName LanguageCode Client TableName DisplayName);
+    my %defaults = ('TableName' => ''); 
+    my %numerics;  # set to 1 for each param which has numeric type
+    my %verify = ('LanguageCode' => 'Language');  
+    my $nameStr = '';
+    my $valStr = '';
+    foreach my $p (@params)
+        {
+	last if ($$self{errStr} ne '');
+	my $pVal = get_checkParam($self,$p,$defaults{4},$verify{$p},$bDebug);
+	$nameStr .= ',' if ($nameStr ne '');
+	$valStr .= ',' if ($valStr ne '');
+	$nameStr .= $p;
+	$valStr .= (defined $numerics{$p}) ? $pVal : "'$pVal'";
+        }
+    return insertDB($self,$table,$nameStr,$valStr,$bDebug);
+    }
+
+=head2 addSpeakerFromForm()
+
+ Add a new record into Speaker table based on info sent from form
+ usage: addSpeakerFromForm bDebug --
+ Form must return parameters named:
+	Name char(60) 		name of the person
+	Gender char(1)  	'M' or 'F',
+ This function does no screen IO
+ Returns error message (in English) or empty string
+
+=cut
+
+sub addSpeakerFromForm
+    {
+    my ($self,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $table = 'Speaker';
+    my @params = qw(Name Gender);
+    my %defaults;
+    my %numerics;  # set to 1 for each param which has numeric type
+    my %verify = qw ('Gender' => '=M,F');
+
+    my $nameStr = '';
+    my $valStr = '';
+    print "<pre> addSpeakerFromForm (en) err='$$self{errStr}'\n"
+	if ($bDebug);
+    foreach my $p (@params)
+        {
+	last if ($$self{errStr} ne '');
+	my $pVal = get_checkParam($self,$p,$defaults{4},$verify{$p},$bDebug);
+	$nameStr .= ',' if ($nameStr ne '');
+	$valStr .= ',' if ($valStr ne '');
+	$nameStr .= $p;
+	$valStr .= (defined $numerics{$p}) ? $pVal : "'$pVal'";
+	print "    $p = $pVal\n"
+	    if ($bDebug);
+        }
+    $nameStr .= ",timestamp";
+    $valStr .= ",NOW()";
+    my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+    print "addSpeakerFromForm (ex) err='$err'</pre>\n"
+	if ($bDebug);
+    return $err;
+    }
+
+=head2 addTranslatorFromForm()
+
+ Add a new record into Translator table based on info sent from form
+ usage: addTranslatorFromForm bDebug --
+ Form must return parameters named:
+        Language 	 	3-letter key to Language table
+			     		-- (native language of xlator)
+	Name char(60) 		name of the person (Latin1)
+ This function does no screen IO
+ Returns error message (in English) or empty string
+
+=cut
+
+sub addTranslatorFromForm
+    {
+    my ($self,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $table = 'Translator';
+    my @params = qw(Name Language);
+    my %defaults;
+    my %numerics;  # set to 1 for each param which has numeric type
+    my %verify = ('Language' => 'Language:LanguageCode');  
+
+    my $nameStr = '';
+    my $valStr = '';
+    foreach my $p (@params)
+        {
+	last if ($$self{errStr} ne '');
+	my $pVal = get_checkParam($self,$p,$defaults{4},$verify{$p},$bDebug);
+	$nameStr .= ',' if ($nameStr ne '');
+	$valStr .= ',' if ($valStr ne '');
+	$nameStr .= $p;
+	$valStr .= (defined $numerics{$p}) ? $pVal : "'$pVal'";
+        }
+    $nameStr .= ",timestamp";
+    $valStr .= ",NOW()";
+    return insertDB($self,$table,$nameStr,$valStr,$bDebug);
+    }
+
+=head2 showAddUserForm()
+
+ generate a query form in HTML as a Javascript function call to
+ Javascript showAddUserForm();
+ usage: showAddUserForm bDebug -- 
+
+=cut
+
+sub showAddUserForm
+    {
+    my ($self,$bDebug) = @_;
+    my $LangList = getLanguagesAsOptions($self,1);
+    if ($LangList eq '')
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    print "<SCRIPT>showAddUserForm('$LangList');</SCRIPT>\n";
+    }
+
+=head2 addUserFromForm()
+
+ Add a new record into Userr table based on info sent from form
+ usage: addUserFromForm bDebug --
+ Form must return parameters named:
+	Name char(60) 		name of the person
+        Language 	 	3-letter key to Language table
+				     	-- preferred menu language
+        Name 			login name (utf8)
+        RealName 		utf8
+	Password char(32)		COMMENT 'empty if not authorized',
+					-- encrypted
+ This function does no screen IO
+ Returns error message (in English) or empty string
+
+=cut
+
+sub addUserFromForm
+    {
+    my ($self,$bDebug) = @_;
+    my $dbDbi = $$self{dbDbi};
+    my $table = 'User';
+    my @params = qw(Name RealName Language Password);
+    my %defaults;
+    my %numerics;  # set to 1 for each param which has numeric type
+    my %verify = ('Language' => 'Language:LanguageCode');  
+
+    my $nameStr = '';
+    my $valStr = '';
+    print "<pre> addUserFromForm (en) err='$$self{errStr}'\n"
+	if ($bDebug);
+    foreach my $p (@params)
+        {
+	last if ($$self{errStr} ne '');
+	my $pVal = get_checkParam($self,$p,$defaults{4},$verify{$p},$bDebug);
+	$nameStr .= ',' if ($nameStr ne '');
+	$valStr .= ',' if ($valStr ne '');
+	$nameStr .= $p;
+	$valStr .= (defined $numerics{$p}) ? $pVal : "'$pVal'";
+	print "    $p = $pVal\n"
+	    if ($bDebug);
+        }
+    $nameStr .= ",timestamp";
+    $valStr .= ",NOW()";
+    my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+    print "addUserFromForm (ex) err='$err'</pre>\n"
+	if ($bDebug);
+    return $err;
+    }
+
+=head2 addWordFromForm()
+
+ Add a new record into the Word table based on info sent from form
+ usage: addWordFromForm bDebug --
+ Form must return parameters named:
+	Spelling		spelling in Thai
+
+ Form may return parameters named:
+        Translation		requires Language, Translator
+        Pronunciation           requires Speaker
+        Language                code
+        Translator              key
+        Speaker                 key
+        History
+        Component               (not yet implemented)
+        Synonym
+        Explanation             requires Language, Translator
+        Example                 requires Language, Translator
+
+ Note about this function: 
+   1. This will add a new Word even if one previously exists in
+      the DB. This is correct, but may not always be what you want.
+   2. The key which is returned (an integer) is needed for later
+      additions to other tables which refer to this particular use
+      of this wordl
+ This function does no screen IO
+ Returns error message (in English) beginning with 'Error'
+ or a string containing the key number
+ (for example, either 
+    "Error: something went wrong"
+ or
+    "12"
+)
+       WARNING -- as of 07 Sept THIS CODE IS NOT TESTED
+
+=cut
+
+sub addWordFromForm
+    {
+    my ($self,$bDebug) = @_;
+    my $spelling = param('Spelling');        # UTF-8
+    my $partofspeechcode = param('PartOfSpeechCode');   # note this is KEY
+    my $history = param('History');          # in Thai in UTF-8
+    my $translation = param('Translation');  # UTF-8
+    my $language = param('Language');        # note this is KEY
+    my $translator = param('Translator');    # note this is KEY
+    my $pronunciation = param('Pronunciation'); # this is a filename
+    my $speaker = param('Speaker');          # note this is KEY
+    my $component = param('Component');      # spelling in Thai in UTF-8
+    my $synonym = param('Synonym');          # Word Key
+    my $explanation = param('Explanation');  # UTF-8
+    my $example = param('Example');          # UTF-8
+    my $err 
+	= ($spelling eq '') ? "no spelling specified"
+	: (($translation ne '') && ($language eq '')) ? "no language specified"
+	: (($translation ne '') && ($translator eq '')) ? "no translator specified"
+	: (($pronunciation ne '') && ($speaker eq '')) ? "no speaker specified"
+	: '';
+    my $wordKey = -1;
+    my $historyKey = -1;
+    if (($err eq '') && ($history ne ''))
+        {
+	my $table = 'History';
+	my $nameStr = 'History,Timestamp';
+	my $valStr = "$history,NOW()";
+	my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	$historyKey = getLastKey($self,$table) if ($err eq '');
+	print "addWordFromFormExtended added $table err='$err' key=$historyKey</pre>\n"
+	    if ($bDebug);
+        }
+    if ($err eq '')
+        {
+	my $table = 'Word';
+	my $nameStr = 'Spelling,PartOfSpeechCode,History,Timestamp';
+	my $valStr = "$spelling,$partofspeechcode,$historyKey,NOW()";
+	my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	$wordKey = getLastKey($self,$table) if ($err eq '');
+	print "addWordFromFormExtended added $table err='$err' key=$wordKey</pre>\n"
+	    if ($bDebug);
+        }
+    if (($err eq '') && ($translation ne ''))
+        {
+	my $table = 'Translator';
+	my $nameStr = 'Word,Language,Translator,Translation,Timestamp';
+	my $valStr = "$wordKey,$language,$translator,$translation,NOW()";
+	my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	my $key = -1;
+	$key = getLastKey($self,$table) if ($err eq '');
+	print "addWordFromFormExtended added $table err='$err' key=$key</pre>\n"
+	    if ($bDebug);
+        }
+    if (($err eq '') && ($pronunciation ne ''))
+        {
+	my $table = 'Pronunciation';
+	my $nameStr = 'Speaker,Pronunciation,Timestamp';
+	my $valStr = "$speaker,$pronunciation,NOW()";
+	my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	my $key = -1;
+	$key = getLastKey($self,$table) if ($err eq '');
+	print "addWordFromFormExtended added $table err='$err' key=$key</pre>\n"
+	    if ($bDebug);
+	if ($err eq '')  # add pronunciation key to PronunciateionRef table
+            {
+	    my $table = 'PronunciationRef';
+	    my $nameStr = 'Word,Pronunciation,Timestamp';
+	    my $valStr = "$wordKey,$key,NOW()";
+	    my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	    my $key = -1;
+	    $key = getLastKey($self,$table) if ($err eq '');
+	    print "addWordFromFormExtended added $table err='$err' key=$key</pre>\n"
+		if ($bDebug);
+            } 
+        }
+    if (($err eq '') && ($synonym ne ''))
+        {
+	my $table = 'Synonym';
+	my $nameStr = 'Word,SynonymWord,Timestamp';
+	my $valStr = "$wordKey,$synonym,NOW()";
+	my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	my $key = -1;
+	$key = getLastKey($self,$table) if ($err eq '');
+	print "addWordFromFormExtended added $table err='$err' key=$key</pre>\n"
+	    if ($bDebug);
+        }
+    if (($err eq '') && ($explanation ne ''))
+        {
+	my $table = 'Explanation';
+	my $nameStr = 'Word,Translator,Explanation,Timestamp';
+	my $valStr = "$wordKey,$translator,$explanation,NOW()";
+	my $err = insertDB($self,$table,$nameStr,$valStr,$bDebug);
+	my $key = -1;
+	$key = getLastKey($self,$table) if ($err eq '');
+	print "addWordFromFormExtended added $table err='$err' key=$key</pre>\n"
+	    if ($bDebug);
+        }
+    return ($wordKey >= 0) ? $wordKey : "Error: $err";
+    }
+
+############################################################################
+#
+# test functions
+#
+############################################################################
+=head2 testFindWord()
+
+ Test DB access to find wordkeys which match example criteria
+
+=cut
+
+sub testFindWord
+    {
+    my $self = shift;
+#    my $findWordArgs = "translation='yet',translator='',component='',language='english'";
+#    my $findWordArgs = "partofspeechcode='adv',translator='',component='',language='english'";
+#    my $findWordArgs = "spelling=CAST('กำลัง' as BINARY),translator='',speaker='',component='',synonym='',language='eng'";
+    my $findWordArgs = "spelling='กำลัง',translator='',speaker='',component='',synonym='',language='eng'";
+#    my $findWordArgs = "translation='yet'";
+    my @words = findWord($self,$findWordArgs,1);
+    my $uCnt = @words - 1;
+    if ((@words == 0) || ($words[0] eq ''))
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    elsif ($uCnt == 0)
+        {
+	print "<h4>No matching words found for test.</h4>\n";
+        }
+    else
+        {
+	print "<pre>Test result ($uCnt items):<br>";
+	for (my $j=1; $j<=$uCnt; $j++)
+            {
+	    print "   $j: $words[$j]<br>";
+            }
+	print "</pre>\n";
+        }
+    }
+
+=head2 testFindWord()
+
+ Test DB access to find information for some specified wordkey
+
+=cut
+
+sub testGetWordInfo
+    {
+    my $self = shift;
+    my @info = getWordInfo($self,13,'eng',1);
+    my $uCnt = @info - 1;
+    if ((@info == 0) || ($info[0] eq ''))
+        {
+	my $err = getErrStr($self);
+	print "<h4>$err</h4>\n";
+        }
+    elsif ($uCnt == 0)
+        {
+	print "<h4>No matching info found for test.</h4>\n";
+        }
+    else
+        {
+	print "<pre>Info test result ($uCnt items):<br>\n";
+	for (my $j=0; $j<=$uCnt; $j++)
+            {
+	    print "   $j: $info[$j]<br>\n";
+            }
+	print "</pre>\n";
+        }
+    }
+
+
+1

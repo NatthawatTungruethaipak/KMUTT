@@ -1,0 +1,59 @@
+import java.awt.Point;
+
+public class DiamondTesterGraphics
+{
+
+	public static void main(String[] args)
+	{
+		boolean bContinue = true;
+		FigureViewer viewer = new FigureViewer();
+		viewer.pack();
+		viewer.setVisible(true);
+
+		while (bContinue)
+		{
+			int x1, x2, x3;
+			int y1, y2, y3;
+			x1 = IOUtils.getInteger("Enter x for point 1 (negative to exit): ");
+			if (x1 < 0)
+			{
+				bContinue = false;
+			}
+			else
+			{
+				y1 = IOUtils.getInteger("Enter y for point 1: ");
+				x2 = IOUtils.getInteger("Enter x for point 2: ");
+				y2 = IOUtils.getInteger("Enter y for point 2: ");
+				Triangle triangle = new Triangle(x1, y1, x2, y2, x3, y3);
+				triangle.draw(viewer.getViewerGraphics());
+				double perim = triangle.calcPerimeter();
+				System.out.println("Perimeter is " + perim);
+				double area = triangle.calcArea();
+				System.out.println("Area is " + area + "\n\n");
+				String move = IOUtils.getString("Want to move the triangle (Y/N)?");
+				if ((move.startsWith("Y")) || (move.startsWith("y")))
+				{
+					x1 = IOUtils.getInteger("New X: ");
+					y1 = IOUtils.getInteger("New Y: ");
+					Point anchor = new Point(x1, y1);
+					triangle.move(anchor);
+					viewer.clear();
+					try
+					{
+						Thread.sleep(1000); // Wait for clear to complete
+					} catch (InterruptedException ie)
+					{
+					}
+					triangle.draw(viewer.getViewerGraphics());
+				}
+				System.out.println("-----------------------------\n");
+			}
+		}
+		System.out.println("About to draw all square");
+		Triangle.drawAll(viewer.getViewerGraphics());
+		String dummy = IOUtils.getString("Press return to exit.");
+		System.exit(0);
+
+	}
+
+}

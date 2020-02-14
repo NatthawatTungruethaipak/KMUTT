@@ -1,0 +1,68 @@
+
+<!-- saved from url=(0053)http://windu.cpe.kmutt.ac.th/cpe372/Quiz1Answers.html -->
+<html class="gr__windu_cpe_kmutt_ac_th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>CPE 343/372 2019 - Quiz 1</title>
+</head>
+<body data-gr-c-s-loaded="true">
+<h3 align="center">CPE 343/372<br>
+Object Oriented Analysis and Design<br>
+Quiz 1</h3>
+<h4><font color="red">ANSWERS</font></h4>
+
+<ol>
+<li>Suppose we have the following simple Java class:
+<pre><b>public class 3DPoint
+{
+   private int X;   /* X coordinate of the point */
+   private int Y;   /* Y coordinate of the point */
+   private int Z;   /* Z coordinate of the point */
+
+   /* Constructor initializes the coordinates */
+   public 3DPoint(int xcoord, int ycoord, int zcoord)
+      {
+      X = xcoord; Y = ycoord; Z = zcoord;
+      }  
+
+  ... /* more code */
+}</b></pre>
+In the space below, 
+write a single Java statement that calls 
+the constructor to create a <b>3DPoint</b> called <i><b>myPoint</b></i> with x=20, y=15 and z=25. (3 points)
+<pre><b><font color="red">
+  myPoint = new 3DPoint(20,15,25);</font></b> or
+  <b><font color="red">3DPoint myPoint = new 3DPoint(20,15,25);</font></b>
+
+</pre>
+</li>
+<li>In software design, what do we mean by <i><b>modularity</b></i>? (4 points
+<p><font color="red"><b>
+Modularity means dividing up 
+the functionality of software into distinct units of code 
+which can be designed, developed and tested at least somewhat separately.
+</b></font></p>
+
+</li><li>Consider the following code, from the <i><b>EmailTester.java</b></i> class used
+in Exercise 1.
+<pre><b>	    EmailMessage msg = new EmailMessage();
+	    String to = IOUtils.getString("==&gt; Enter To email address");
+	    msg.setToAddress(to);
+	    String from = IOUtils.getString("==&gt; Enter From email address");
+	    msg.setFromAddress(from);
+	    String subject = IOUtils.getString("==&gt; Enter email subject");
+	    msg.setSubject(subject);</b></pre>
+</li>
+Which of the following statements is/are true about <i><b>msg</b></i>? (3 points)
+<br>
+<ol type="a">
+<li><i><b>msg</b></i> is a class</li>
+<li><font color="red"><i><b>msg</b></i> is an instance of a class</font></li>
+<li><i><b>msg</b></i> is a constructor</li>
+<li><font color="red"><i><b>msg</b></i> is a variable</font></li>
+<li>All of the above are true</li>
+<li>None of the above is true.</li>
+</ol>
+</ol>
+
+
+</body></html>

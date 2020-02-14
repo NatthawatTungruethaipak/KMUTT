@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0060)http://windu.cpe.kmutt.ac.th/cpe372/JavaCodingStandards.html -->
+<html class="gr__windu_cpe_kmutt_ac_th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<title>Java Coding Standards</title>
+	<meta name="GENERATOR" content="OpenOffice.org 1.1.2  (Win32)">
+	<meta name="AUTHOR" content="Sally Goldin">
+	<meta name="CREATED" content="20040725;19082709">
+	<meta name="CHANGEDBY" content="Sally Goldin">
+	<meta name="CHANGED" content="20040725;19174455">
+
+</head>
+<body lang="en-US" dir="LTR" data-gr-c-s-loaded="true">
+<p align="CENTER" style="margin-bottom: 0in; page-break-before: always">
+<font size="4"><b>Java Coding Standards</b></font>
+<br><i>Last Updated: August 12, 2017</i>
+</p>
+<p style="margin-bottom: 0in"><b>Java Language Requirements</b></p>
+<ol>
+  <li><p style="margin-bottom: 0in">
+      Every source file in Java defines one class. If the name of class is <i>ClassName</i>, then the source file must be <i><b>ClassName.java</b></i>.
+      Like C, Java is case sensitive.
+   </p></li>
+  <li><p style="margin-bottom: 0in">Java uses <i>packages</i> to break up the functionality of larger programs. Packages
+       have a hierarchical naming convention. For instance, packages created by CPE programmers should be named as follows:
+</p><pre><b>        th.ac.kmutt.cpe.MyPackage
+	th.ac.kmutt.cpe.MyPackage.Utils
+</b></pre>
+    If you use packages, Java requires that you keep your source files in a directory structure that matches the hierarchical package
+    structure. For example, all the source files for <i>MyPackage</i> in the above example  must be located in:
+<pre><b>    [devroot]/th/ac/kmutt/cpe/MyPackage
+</b></pre>
+The  directory <i>[devroot]</i> can be any directory. This is where you must be located when you run the program.
+<p></p>
+</li>
+
+</ol>
+
+<p style="margin-bottom: 0in"><b>Comments</b></p>
+<ol>
+
+  <li><p style="margin-bottom: 0in">Java accepts, and you may use, both C and C++ style comments. That is, you can use
+either <b>/*  .... */</b> or  <b>//</b> for inline comments. However, all <i>header</i> comments for classes, methods and variables must
+use the comment style required by the <i>javadoc</i> utility, that is, they must begin with <b>/**</b> (two asterisks) and
+end with <b>*/</b>.</p></li>
+ 
+  <li><p style="margin-bottom: 0in">Immediately before the <i><b>class</b></i> declaration in  each Java source file, you  must have
+	a comment that includes the name of the class, a
+	one-sentence description of what the class does, the
+	programmer's name and nickname, the programmer's student ID, and the
+	creation date. Note that this comment must begin with <b>/**</b> not <b>/*</b> so that it will be recognized by the javadoc utility.</p> 
+<p style="margin-bottom:
+	0in"><i>Example</i></p>
+<pre> /**
+  *  
+  * EmailMessage
+  *
+  *   This class represents a single message, either created or
+  *   received, in an email client application.
+  *
+  *   Created by Suwannee Promprasong (Nee)  ID 58070703435
+  *     6 Sept 2017
+  *
+  *
+  */  
+public class EmailMessage
+{
+   ...
+}
+</pre>
+<p></p>
+<p style="margin-bottom: 0in">The only thing before this comment should be any <b>import</b> statements required by your class.</p>
+  </li>
+
+  <li><p style="margin-bottom: 0in">Immediately before each <b>method</b> (function), you must write
+	a comment beginning with <b>/**</b> that explains what the method does, lists and
+	explains the function arguments, and explains the return value
+	if any. You <b>must</b> use the javadoc prefixes <i>@param</i> and <i>@return</i> 
+       to identify the different kinds of information.</p> 
+<p style="margin-bottom: 0in"><i>Example</i></p>
+
+<pre>    /** 
+     * Return one of the X coordinates
+     * @param  which    1, 2, or 3 specifying which vertex we want
+     * @return vertex X coordinate, or -1 if argument is not 1, 2 or 3
+     */
+    public int getX(int which)
+    {
+    ....
+    }  
+</pre>
+  </li>
+  <li><p style="margin-bottom: 0in">Immediately befor the declaration of each <b>member data item</b>, you must write
+	a comment starting with <b>/**</b> that explains what the member data means and what it is used for.</p> 
+<p style="margin-bottom:
+	0in"><i>Example</i></p>
+<pre>   /** X coordinates of three points defining the triangle */
+   private int xcoord[] = new int[3];
+
+   /** Y coordinates of three points defining the triangle */
+   private int ycoord[] = new int[3];
+</pre>
+</li>
+
+  <li><p style="margin-bottom: 0in"><b>Comments</b> should be used
+	elsewhere to introduce sections of the program or to explain
+	calculations that might not be clear to the reader. However,
+	you should not put in comments where the purpose is
+	obvious. Excessive use of comments makes a program harder to
+	understand, not easier!</p> <p style="margin-bottom:
+	0in"><i>Examples</i></p>
+
+<pre>       /* Initialize Vat to zero so we do not need an else clause*/        
+       vat = 0;
+       
+       ....
+
+       /* area formula is  
+         |Ax(By - Cy) + Bx(Cy - Ay) + Cx(Ay - By)|/2
+       */
+       int numerator = xcoord[0] * (ycoord[1] - ycoord[2]);
+       numerator += xcoord[1] * (ycoord[2] - ycoord[0]);
+       numerator += xcoord[2] * (ycoord[0] - ycoord[1]);
+</pre>
+
+  </li>
+
+  <li><p style="margin-bottom: 0in">The declaration of each non-member variable must
+        include a short comment explaining the purpose or meaning of
+        the variable. Exception: if you use <i>i</i>, <i>j</i> as loop indices, no
+        comment is necessary.</p> <p style="margin-bottom:
+        0in"><i>Example</i></p>
+
+<pre>        int totalOnes;  /* count of one baht coins seen */
+        int totalFives; /* count of five baht coins seen */
+        String input;   /* space to store text typed by user */
+</pre>
+  </li>
+
+  <li><p style="margin-bottom: 0in">If you use arrays, your variable comment must also
+         explain the use of each subscript</p> 
+<p style="margin-bottom: 0in"><i>Example</i></p>
+
+<pre>        int population[77];              /* population of each of the 77 Thai provinces */
+	String provinceNames[77];        /* names of the corresponding provinces */
+</pre>
+         As shown above, it is nice if your variable comments line up neatly, so that
+         they are easy to read.
+  </li>
+</ol>
+<p style="margin-bottom: 0in"><b>Format and Indenting</b></p>
+<ol>
+
+  <li><p style="margin-bottom: 0in">The curly braces that enclose the class definition
+	should be at the start of the line. Do not indent them:
+	</p>
+<p style="margin-bottom: 0in"><i>Example</i></p>
+
+<pre>public class Triangle
+{
+   /* code.... */
+}
+</pre>
+
+</li>
+
+  <li><p style="margin-bottom: 0in">The declaration for a method
+	should be <b>indented</b> four spaces from the left edge of the page.
+	</p></li>
+
+  <li><p style="margin-bottom: 0in">The curly braces for a method
+	should also be <b>indented</b> four spaces from the left edge of the page, and should
+        line up vertically with the method declaration.
+	</p></li>
+
+  <li><p style="margin-bottom: 0in">The statements in a method
+	should be <b>indented</b> four spaces from the starting brace of the
+	function, or from the starting brace of their
+	controlling statement if they are in a compound statement block.</p>
+
+  </li><li><p style="margin-bottom: 0in">Comments should be <b>indented</b>
+	so they line up with the statements.</p>
+  <p style="margin-bottom: 0in"><i>Example of correct indenting for methods</i></p>
+  <pre>    /**
+     * calculate the perimeter of this triangle
+     * @return perimeter value
+     */
+    public double calcPerimeter()
+    {
+	double perimeter = 0;
+        /* loop, summing up the length of the three sides */
+        for (int i = 1; i &lt; 4; i++)
+	{
+            /* calcLength returns the length of one side */			    
+	    perimeter = perimeter + calcLength(i);
+	} 
+        return perimeter;
+    }
+
+  </pre>
+  </li> 
+
+  <li><p style="margin-bottom: 0in">All <b><i>switch
+	statements</i></b> should be indented like the following:</p>
+	<p style="margin-bottom: 0in"><i>Example</i></p>
+
+<pre>    switch(value)
+    {
+        case 1:
+            printf("This is case 1\n");
+            break;
+        case 2:
+            printf("This is case 2\n");
+            break;
+        default:
+            printf("NO MATCH!\n"); 
+    }
+</pre>
+
+       Do not put the <b>break</b> on the same line as any other
+       statement. Do not put anything after the colon in the
+       <b>case</b> line.  </li>
+
+<p></p>
+
+  <li>You must <b>never</b> use so-called "running dog" braces in code
+      that you write for my class. "Running dog" means that the
+      starting brace of a block comes at the end of the previous line
+      rather than on a line of its own. Programs that use this style
+      are very difficult to understand because it is hard to match up
+      the beginning and end of blocks. This is a common style used
+      by some Java programmers and Java editors, but I will not
+      accept it.
+
+
+   <p style="margin-bottom:
+      0in"><i><font color="red">BAD Example</font></i></p>
+
+<pre>   <font color="red">/* DO NOT FORMAT LIKE THIS! */</font>
+   if (format.compareTo("Running Dog") == 0) {
+      System.out.println("Serious coding standards error!\n");
+      System.out.println("You will lose credit! \n"); 
+      }
+</pre>
+
+  </li>
+
+</ol>
+
+<p style="margin-bottom: 0in"><b>Names</b></p>
+
+<ol>
+	<li><p style="margin-bottom: 0in">Do not use underscores to separate words in any names in your
+	Java programs.</p>
+	</li><li><p style="margin-bottom: 0in">Class names <b>must</b> begin with
+        an upper case letter. If the class name is multiple words, each word should
+	be capitalized.</p>
+	</li><li><p style="margin-bottom: 0in">Names of methods <b>must</b> begin with
+        a lower case letter. If the method name is multiple words, each word after the first should
+	be capitalized.</p>
+	</li><li><p style="margin-bottom: 0in">Names of variables and member data items <b>must</b> begin with
+        a lower case letter. If the name is multiple  words, each word after the first should
+	be capitalized.</p>
+<p style="margin-bottom: 0in"><i>Examples</i></p>
+<pre>public class EmailMessage
+{
+}
+...
+  int initialPopulationValue = 0;
+  String provinceName; 
+  double percent = 0.0;   
+  double calculatePopulation(int thisWeek, 
+                             double changeRate, 
+                             int weekCount); 
+</pre>
+
+    
+	</li><li><p style="margin-bottom: 0in">Names of variables should be
+	meaningful and express what the variable does.</p>
+	</li><li><p style="margin-bottom: 0in">Names of methods should be
+	meaningful and express what the method does.</p>
+	</li><li><p style="margin-bottom: 0in">Avoid using abbreviations in
+	variable and method names except when the meaning of the
+	abbreviation is very commonly understood.
+</p><pre>   int stdCount;        /* Not a good name */
+   int studentCount;    /* Much better */
+   float vat;           /* Ok because this is a common abbreviation */
+   float gpa;           /* Ok because this is a common abbreviation */ 
+</pre>        
+
+<p></p>
+</li></ol>
+<p style="margin-bottom: 0in"><b>Program
+Structure</b></p>
+<ol>
+	<li><p style="margin-bottom: 0in; font-weight: medium">If your class
+	 includes a constructor, this should be the first defined
+	 method	of the class.</p></li>
+	<li><p style="margin-bottom: 0in; font-weight: medium">If your class
+	 includes a <b>main()</b> method, this should be the last defined
+	 method	of the class.</p></li>
+	<li><p style="margin-bottom: 0in; font-weight: medium">Group your
+	 methods according to what they do. For instance, if you have
+	 multiple getter and setter methods, define them together rather than
+	interspersing the definitions of other methods.</p></li>
+
+</ol>
+
+
+</body></html>

@@ -1,0 +1,98 @@
+/**
+ * Extension of TriangleTester that displays triangles, too.
+ *
+ *   Created by Sally Goldin, 23 April 2013 for CPE 113
+ *   9 Aug 2017 got rid of "show()" deprecated method
+ *   19 August 2017 adjusted to use Triangle that can draw itself
+ *   Added multiple "draw all" operations.
+ */
+
+import java.io.*;
+import java.util.*;
+
+public class TriangleTesterGraphics extends TriangleTester
+{
+    /**
+     * Asks for a string, and returns it
+     * as the function value.
+     * @param   prompt    String to print, telling which coordinate
+     * @return  the string value entered, without a newline 
+     */
+    protected static String getOneString(String prompt)
+       {	   
+       String inputString;
+       int readBytes = 0;
+       byte buffer[] = new byte[200]; 
+       System.out.println(prompt);
+       try
+           {
+           readBytes = System.in.read(buffer,0,200);
+	   }
+       catch (IOException ioe)
+           {
+	   System.out.println("Input/output exception - Exiting");
+	   System.exit(1);
+           }
+       inputString = new String(buffer);
+       /* modify to work for both Windows and Linux */
+       int pos = inputString.indexOf("\r");
+       if (pos <=0 )
+	   pos = inputString.indexOf("\n");
+       if (pos > 0)
+	   inputString = inputString.substring(0,pos);
+       return inputString;
+       }
+
+
+   /* Main method first creates the viewer. Then it
+    * asks for coordinates, creates new triangles, and displays them. 
+    * Then prints the perimetr and area as well.
+    */
+   public static void main(String arguments[])
+   {
+       boolean bContinue = true;
+       FigureViewer viewer = new FigureViewer();
+       viewer.pack();
+       viewer.setVisible(true);
+       
+       while (bContinue)
+       {
+	   int x1, x2, x3;
+	   int y1, y2, y3;
+	   x1 = getOneCoordinate("Enter x for point 1 (negative to exit): ");
+	   if (x1 < 0)
+	   {
+	       bContinue = false;
+	   }
+	   else
+	   {
+	       y1 = getOneCoordinate("Enter y for point 1: ");
+	       x2 = getOneCoordinate("Enter x for point 2: ");
+	       y2 = getOneCoordinate("Enter y for point 2: ");
+	       x3 = getOneCoordinate("Enter x for point 3: ");
+	       y3 = getOneCoordinate("Enter y for point 3: ");
+	       Triangle triangle = new Triangle(x1,y1,x2,y2,x3,y3);
+	       triangle.draw(viewer.getViewerGraphics());
+	       double perim = triangle.calcPerimeter();
+	       System.out.println("Perimeter is " + perim);
+	       double area = triangle.calcArea();
+	       System.out.println("Area is " + area + "\n\n");
+	       String response = getOneString("Want to draw all the triangles? ");
+	       if ((response.startsWith("Y")) || (response.startsWith("y")))
+	       {
+		   viewer.clear();
+		   try 
+		   {
+		       Thread.sleep(1000); // Wait for clear to complete
+		   }
+		   catch (InterruptedException ie)
+		   {
+		   }
+		   Triangle.drawAll(viewer.getViewerGraphics());    
+	       } 
+	   }   
+       }
+       System.exit(0);
+   }
+      
+}

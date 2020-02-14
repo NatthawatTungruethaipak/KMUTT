@@ -1,0 +1,40 @@
+/**
+ *  
+ * EmailMessage
+ *
+ *   This class represents a single message, either created or
+ *   received, in an email client application.
+ *
+ *   Created by Natthawat Tungruethaipak (Tong)  ID 60070503426
+ *     16 Jan 2020
+ *
+ *
+ */  
+public class EmailMessage {
+	
+	private String toAddress;
+	private String fromAddress;
+	private String subject;
+	private String dateTime = getDateTime();
+	
+	public void setToAddress(String toAddress)
+	{
+		this.toAddress = toAddress;
+	}
+	public void setFromAddress(String fromAddress)
+	{
+		
+	}
+	public void setSubject()
+	{
+		
+	}
+	public void send()
+	{
+		
+	}
+	public String getToAddress()
+	{
+		return to_Address;
+	}
+}

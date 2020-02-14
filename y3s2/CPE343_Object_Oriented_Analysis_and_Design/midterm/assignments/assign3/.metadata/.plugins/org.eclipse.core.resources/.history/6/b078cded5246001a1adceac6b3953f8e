@@ -1,0 +1,160 @@
+import java.awt.Point;
+
+public class ShapeTesterGraphics extends AbstractShape
+{
+	public static void main(String arguments[])
+	{
+		boolean bContinue = true;
+		FigureViewer viewer = new FigureViewer();
+		viewer.pack();
+		viewer.setVisible(true);
+		while (bContinue)
+		{
+			System.out.println("1 - Create and draw triangle");
+			System.out.println("2 - Create and draw square");
+			System.out.println("3 - Create and draw diamond");
+			System.out.println("4 - Draw all shapes");
+			System.out.println("5 - Exit");
+			int x1, x2, x3, y1, y2, y3, vAxis, hAxis, choice;
+			int length; /* length of one side */
+			double perim;
+			double area;
+			choice = IOUtils.getInteger("Enter your choice: ");
+			if (choice == 1)
+			{
+				x1 = IOUtils.getInteger("Enter x for point 1: ");
+				y1 = IOUtils.getInteger("Enter y for point 1: ");
+				x2 = IOUtils.getInteger("Enter x for point 2: ");
+				y2 = IOUtils.getInteger("Enter y for point 2: ");
+				x3 = IOUtils.getInteger("Enter x for point 3: ");
+				y3 = IOUtils.getInteger("Enter y for point 3: ");
+				Triangle triangle = new Triangle(x1, y1, x2, y2, x3, y3);
+				triangle.draw(viewer.getViewerGraphics());
+				perim = triangle.calcPerimeter();
+				System.out.println("Perimeter is " + perim);
+				area = triangle.calcArea();
+				System.out.println("Area is " + area + "\n\n");
+				System.out.println("-----------------------------");
+				String move = IOUtils.getString("Move it?");
+				if ((move.startsWith("Y")) || (move.startsWith("y")))
+				{
+					x1 = IOUtils.getInteger("New X: ");
+					y1 = IOUtils.getInteger("New Y: ");
+					Point anchor = new Point(x1, y1);
+					triangle.move(anchor);
+					viewer.clear();
+					try
+					{
+						Thread.sleep(1000); // Wait for clear to complete
+					} catch (InterruptedException ie)
+					{
+					}
+					triangle.draw(viewer.getViewerGraphics());
+				}
+				else
+				{
+					continue;
+				}
+			}
+			else if (choice == 2)
+			{
+				x1 = IOUtils.getInteger("Enter x for upper left point: ");
+				y1 = IOUtils.getInteger("Enter y for upper left point: ");
+				length = IOUtils.getInteger("Length of each side of square: ");
+				Square latestSquare = new Square(x1, y1, length);
+				latestSquare.draw(viewer.getViewerGraphics());
+				perim = latestSquare.calcPerimeter();
+				System.out.println("Perimeter is " + perim);
+				area = latestSquare.calcArea();
+				System.out.println("Area is " + area + "\n\n");
+				System.out.println("-----------------------------");
+				String move = IOUtils.getString("Move it?");
+				if ((move.startsWith("Y")) || (move.startsWith("y")))
+				{
+					x1 = IOUtils.getInteger("New X: ");
+					y1 = IOUtils.getInteger("New Y: ");
+					Point anchor = new Point(x1, y1);
+					latestSquare.move(anchor);
+					viewer.clear();
+					try
+					{
+						Thread.sleep(1000); // Wait for clear to complete
+					} catch (InterruptedException ie)
+					{
+					}
+					latestSquare.draw(viewer.getViewerGraphics());
+				}
+				else
+				{
+					continue;
+				}
+			}
+			else if (choice == 3)
+			{
+				x1 = IOUtils.getInteger("Enter x for anchor point: ");
+				y1 = IOUtils.getInteger("Enter y for anchor point: ");
+				vAxis = IOUtils.getInteger("Enter vertical axis: ");
+				hAxis = IOUtils.getInteger("Enter horizontal axis: ");
+				Diamond diamond = new Diamond(x1, y1, vAxis, hAxis);
+				diamond.draw(viewer.getViewerGraphics());
+				perim = diamond.calcPerimeter();
+				System.out.println("Perimeter is " + perim);
+				area = diamond.calcArea();
+				System.out.println("Area is " + area + "\n\n");
+				String move = IOUtils.getString("Want to move the diamond (Y/N)?");
+				if ((move.startsWith("Y")) || (move.startsWith("y")))
+				{
+					x1 = IOUtils.getInteger("New X: ");
+					y1 = IOUtils.getInteger("New Y: ");
+					Point anchor = new Point(x1, y1);
+					diamond.move(anchor);
+					viewer.clear();
+					try
+					{
+						Thread.sleep(1000); // Wait for clear to complete
+					} catch (InterruptedException ie)
+					{
+					}
+					diamond.draw(viewer.getViewerGraphics());
+				}
+				System.out.println("-----------------------------\n");
+			}
+			else if (choice == 4)
+			{
+				Square.drawAll(viewer.getViewerGraphics());
+				Triangle.drawAll(viewer.getViewerGraphics());
+			}
+			else if (choice == 5)
+			{
+				bContinue = false;
+			}
+			else
+			{
+				System.out.println("Please select 1-5");
+				continue;
+			}
+		}
+	}
+
+	public void move(Point newAnchor)
+	{
+		vertices.set(0, new Point(newAnchor.x, newAnchor.y));
+		vertices.set(1, new Point(newAnchor.x + oneside, newAnchor.y));
+		vertices.set(2, new Point(newAnchor.x + oneside, newAnchor.y + oneside));
+		vertices.set(3, new Point(newAnchor.x, newAnchor.y + oneside));
+	}
+
+	public double calcPerimeter()
+	{
+	}
+
+	/**
+	 * calculate the area of this triangle
+	 * 
+	 * @return area value
+	 */
+	public double calcArea()
+	{
+		return 0;
+	}
+}
