@@ -38,7 +38,7 @@ public class ShapeFileTester
 			nextShape.draw(viewer.getViewerGraphics());
 			System.out.println("  readShape returned an object: " + nextShape.getClass().toString());
 			System.out.println("      toString: " + nextShape.toString());
-			System.out.println("      perimeter: " + nextShape.calcPerimeter());
+			// System.out.println(" perimeter: " + nextShape.calcPerimeter());
 			nextShape = reader.readShape();
 		}
 		reader.close();

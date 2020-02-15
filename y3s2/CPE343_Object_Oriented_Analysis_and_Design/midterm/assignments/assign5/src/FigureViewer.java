@@ -1,7 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +37,7 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 	public FigureViewer()
 	{
 		super("Figure Viewer");
+		addMouseListener(this);
 		buildUI();
 	}
 
@@ -65,7 +65,6 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 		drawCanvas.setBackground(Color.white);
 		mainPanel.add(drawCanvas, BorderLayout.CENTER);
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
-		addMouseListener(this);
 	}
 
 	/**
@@ -105,9 +104,13 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		Graphics g = getGraphics();
-		g.setColor(Color.BLUE);
-		g.fillOval(e.getX(), e.getY(), 30, 30);
+//		AbstractShape mySquare = new Square(e.getX(), e.getY(), 20);
+//		Graphics g = getGraphics();
+		int myShape = AbstractShape.allFigures.size();
+		System.out.println(myShape);
+//		g.setColor(Color.BLUE);
+//		g.fillOval(e.getX(), e.getY(), 30, 30);
+//		mySquare.draw(this.getViewerGraphics());
 		System.out.println(e.getX() + " " + e.getY());
 	}
 
