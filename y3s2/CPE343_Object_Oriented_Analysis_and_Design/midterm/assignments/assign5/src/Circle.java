@@ -81,17 +81,7 @@ public class Circle extends AbstractShape
 	public void draw(Graphics2D graphics, Color fillColor)
 	{
 		draw(graphics); /* draw the outline */
-		int size = vertices.size();
-		int x[] = new int[size];
-		int y[] = new int[size];
-		for (int i = 0; i < size; i++)
-		{
-			Point p = vertices.get(i);
-			x[i] = p.x;
-			y[i] = p.y;
-		}
-		graphics.setPaint(fillColor);
-		graphics.fillPolygon(x, y, size);
+
 	}
 
 	/**
