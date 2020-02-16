@@ -5,6 +5,7 @@ import java.awt.Point;
  *
  * Created 24 August 2017 for Exercise 3
  *
+ * Modified by Natthawat Tungruethaipak 60070503426, 13 February 2020
  */
 public class Diamond extends AbstractShape
 {
@@ -43,6 +44,10 @@ public class Diamond extends AbstractShape
 		vertices.add(new Point(x + hAxis / 2, y + vAxis / 2));
 		vertices.add(new Point(x, y + vAxis));
 		vertices.add(new Point(x - hAxis / 2, y + vAxis / 2));
+		maxX = x + (hAxis / 2);
+		minX = x - (hAxis / 2);;
+		maxY = y + vAxis;
+		minY = y;
 	}
 
 	/**

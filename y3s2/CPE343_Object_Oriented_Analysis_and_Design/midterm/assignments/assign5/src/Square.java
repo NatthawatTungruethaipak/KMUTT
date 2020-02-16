@@ -9,7 +9,7 @@ import java.awt.*;
  * data. Modified 24 August 2017 for Exercise 3, to make into a subclass of
  * AbstractShape
  *
- *
+ * Modified by Natthawat Tungruethaipak 60070503426, 13 February 2020
  */
 public class Square extends AbstractShape
 {
@@ -39,6 +39,10 @@ public class Square extends AbstractShape
 		vertices.add(new Point(x + side, y)); // upper right
 		vertices.add(new Point(x + side, y + side)); // lower right
 		vertices.add(new Point(x, y + side)); // lower left
+		maxX = x + side;
+		minX = x;
+		maxY = y + side;
+		minY = y;	
 	}
 
 	/* draw, move, and drawAll are handled by the superclass */

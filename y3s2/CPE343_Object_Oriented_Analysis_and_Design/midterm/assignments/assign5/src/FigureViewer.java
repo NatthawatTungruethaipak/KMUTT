@@ -37,7 +37,6 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 	public FigureViewer()
 	{
 		super("Figure Viewer");
-		addMouseListener(this);
 		buildUI();
 	}
 
@@ -64,6 +63,7 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 		drawCanvas.setBorder(new EtchedBorder());
 		drawCanvas.setBackground(Color.white);
 		mainPanel.add(drawCanvas, BorderLayout.CENTER);
+		drawCanvas.addMouseListener(this);
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 	}
 
@@ -107,6 +107,10 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 //		AbstractShape mySquare = new Square(e.getX(), e.getY(), 20);
 //		Graphics g = getGraphics();
 		int myShape = AbstractShape.allFigures.size();
+		for (AbstractShape figures : AbstractShape.allFigures)
+		{
+			figures.inShape(e.getX(), e.getY());
+		}
 		System.out.println(myShape);
 //		g.setColor(Color.BLUE);
 //		g.fillOval(e.getX(), e.getY(), 30, 30);

@@ -3,6 +3,8 @@
  * about instances of AbstractShape that are created.
  *
  * Created by Sally Goldin, 2 September 2017, for Exercise 4 CPE372
+ * 
+ * Modified by Natthawat Tungruethaipak 60070503426, 13 February 2020
  */
 public class ShapeFileTester
 {

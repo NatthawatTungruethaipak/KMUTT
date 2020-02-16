@@ -1,5 +1,5 @@
 import java.awt.Point;
-import java.awt.*;
+
 /**
  * Simple class representing a triangle object. Designed to show the idea of
  * visibility, methods, class data, etc.
@@ -33,6 +33,30 @@ public class Triangle extends AbstractShape
 		vertices.add(anchor);
 		vertices.add(new Point(x2, y2));
 		vertices.add(new Point(x3, y3));
+		maxX = 0;
+		minX = 1000;
+		maxY = 0;
+		minY = 1000;
+		for (Point point : vertices)
+		{
+			if (point.x > maxX)
+			{
+				maxX = point.x;
+			}
+			if (point.x < minX)
+			{
+				minX = point.x;
+			}
+			if (point.y > maxY)
+			{
+				maxY = point.y;
+			}
+			if (point.y > maxY)
+			{
+				minY = point.y;
+			}
+		}
+
 	}
 
 	/**

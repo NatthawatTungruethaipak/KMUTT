@@ -9,14 +9,37 @@ import java.util.ArrayList;
  * for individual shapes like Triangle, Square, etc.
  *
  * V2 - Created by Sally Goldin, 21 August 2017
+ * 
+ * Modified by Natthawat Tungruethaipak 60070503426, 13 February 2020
  */
 public abstract class AbstractShape
 {
 	/**
+	 * Maximum x-axis high value of this shape.
+	 */
+	protected int maxX;
+
+	/**
+	 * Minimum x-axis high value of this shape.
+	 */
+	protected int minX;
+	
+	/**
+	 * Maximum y-axis high value of this shape.
+	 */
+	
+	 protected int maxY;
+	/**
+	 * Minimum y-axis high value of this shape.
+	 */
+	
+	 protected int minY;
+	/**
 	 * Anchor point X,Y determines the "position" of a shape
 	 */
-	protected Point anchor;
+	
 	/* Point is a class in package java.awt that has a public x and y member */
+	 protected Point anchor;
 
 	/** list of points */
 	protected ArrayList<Point> vertices = new ArrayList<Point>();
