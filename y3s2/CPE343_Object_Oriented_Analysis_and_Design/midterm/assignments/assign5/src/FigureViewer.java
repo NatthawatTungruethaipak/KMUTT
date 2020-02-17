@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
@@ -30,6 +31,8 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 	private DrawingCanvas drawCanvas = null;
 	private JButton clearButton = null;
 	private JButton exitButton = null;
+	private JButton redrawButton = null;
+	private Timer myTimer;
 
 	/**
 	 * Constructor creates the User Interface.
@@ -49,6 +52,10 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 		mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		JPanel controlPanel = new JPanel(new FlowLayout());
 		controlPanel.setBorder(new EtchedBorder());
+
+		redrawButton = new JButton("Redraw");
+		redrawButton.addActionListener(this);
+		controlPanel.add(redrawButton);
 
 		clearButton = new JButton("Clear");
 		clearButton.addActionListener(this);
@@ -80,6 +87,10 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 		} else if (source == clearButton)
 		{
 			drawCanvas.clear();
+		} else if (source == redrawButton)
+		{
+			AbstractShape.drawAll((Graphics2D) drawCanvas.getGraphics(), Color.white);
+			AbstractShape.drawAll((Graphics2D) drawCanvas.getGraphics());
 		}
 	}
 
@@ -104,17 +115,18 @@ public class FigureViewer extends JFrame implements ActionListener, MouseListene
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-//		AbstractShape mySquare = new Square(e.getX(), e.getY(), 20);
-//		Graphics g = getGraphics();
 		int myShape = AbstractShape.allFigures.size();
 		for (AbstractShape figures : AbstractShape.allFigures)
 		{
-			figures.inShape(e.getX(), e.getY());
+			boolean getin = figures.inShape(e.getX(), e.getY());
+			if (getin)
+			{
+				System.out.println(figures.getClass());
+				System.out.println("drawcolor");
+				figures.draw((Graphics2D) drawCanvas.getGraphics(), figures.drawColor);
+			}
 		}
 		System.out.println(myShape);
-//		g.setColor(Color.BLUE);
-//		g.fillOval(e.getX(), e.getY(), 30, 30);
-//		mySquare.draw(this.getViewerGraphics());
 		System.out.println(e.getX() + " " + e.getY());
 	}
 

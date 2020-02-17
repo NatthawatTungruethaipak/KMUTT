@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -23,23 +22,23 @@ public abstract class AbstractShape
 	 * Minimum x-axis high value of this shape.
 	 */
 	protected int minX;
-	
+
 	/**
 	 * Maximum y-axis high value of this shape.
 	 */
-	
-	 protected int maxY;
+
+	protected int maxY;
 	/**
 	 * Minimum y-axis high value of this shape.
 	 */
-	
-	 protected int minY;
+
+	protected int minY;
 	/**
 	 * Anchor point X,Y determines the "position" of a shape
 	 */
-	
+
 	/* Point is a class in package java.awt that has a public x and y member */
-	 protected Point anchor;
+	protected Point anchor;
 
 	/** list of points */
 	protected ArrayList<Point> vertices = new ArrayList<Point>();
@@ -174,6 +173,23 @@ public abstract class AbstractShape
 		}
 	}
 
-	public abstract boolean inShape(int x, int y);
+	public static void drawAll(Graphics2D graphics, Color fillColor)
+	{
+		for (int i = 0; i < allFigures.size(); i++)
+		{
+			AbstractShape shape = allFigures.get(i);
+			shape.draw(graphics, fillColor);
+		}
+	}
 
+	public boolean inShape(int x, int y)
+	{
+		if ((x <= maxX) && (x >= minX) && (y <= maxY) && (y >= minY))
+		{
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
 }

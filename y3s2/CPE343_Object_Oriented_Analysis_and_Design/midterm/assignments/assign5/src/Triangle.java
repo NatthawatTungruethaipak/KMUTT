@@ -9,7 +9,7 @@ import java.awt.Point;
  * triangles Modified 24 August 2017 for Exercise 3, to make into a subclass of
  * AbstractShape
  *
- * 
+ * Modified by Natthawat Tungruethaipak 60070503426, 13 February 2020
  */
 public class Triangle extends AbstractShape
 {
@@ -51,12 +51,11 @@ public class Triangle extends AbstractShape
 			{
 				maxY = point.y;
 			}
-			if (point.y > maxY)
+			if (point.y < minY)
 			{
 				minY = point.y;
 			}
 		}
-
 	}
 
 	/**
@@ -145,12 +144,4 @@ public class Triangle extends AbstractShape
 		}
 		return buffer.toString();
 	}
-
-	@Override
-	public boolean inShape(int x, int y)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

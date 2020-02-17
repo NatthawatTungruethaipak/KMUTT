@@ -45,7 +45,8 @@ public class Diamond extends AbstractShape
 		vertices.add(new Point(x, y + vAxis));
 		vertices.add(new Point(x - hAxis / 2, y + vAxis / 2));
 		maxX = x + (hAxis / 2);
-		minX = x - (hAxis / 2);;
+		minX = x - (hAxis / 2);
+		;
 		maxY = y + vAxis;
 		minY = y;
 	}
@@ -84,12 +85,4 @@ public class Diamond extends AbstractShape
 				+ ", h axis " + horizontalAxis;
 		return value;
 	}
-
-	@Override
-	public boolean inShape(int x, int y)
-	{
-//		if ((x > 10) && (x<20))
-		return false;
-	}
-
 }

@@ -35,7 +35,6 @@ public class Circle extends AbstractShape
 		minX = x - radius;
 		maxY = y + radius;
 		minY = y - radius;
-
 	}
 
 	/**
@@ -71,8 +70,7 @@ public class Circle extends AbstractShape
 	}
 
 	/**
-	 * Draw and fill the shape. This will only work correctly for closed shapes with
-	 * a finite number of vertices (like triangles, squares and diamonds)
+	 * Draw and fill the cirlce
 	 * 
 	 * @param graphics  Graphics context for drawing
 	 * @param fillColor Color to use for filling.
@@ -81,7 +79,9 @@ public class Circle extends AbstractShape
 	public void draw(Graphics2D graphics, Color fillColor)
 	{
 		draw(graphics); /* draw the outline */
-
+		graphics.setPaint(fillColor);
+		// fillOval(int x, int y, int width, int height)
+		graphics.fillOval(anchor.x - radius, anchor.y - radius, 2 * radius, 2 * radius);
 	}
 
 	/**
@@ -91,12 +91,5 @@ public class Circle extends AbstractShape
 	{
 		String value = "Circle: center at (" + anchor.x + "," + anchor.y + ") with radius " + radius;
 		return value;
-	}
-
-	@Override
-	public boolean inShape(int x, int y)
-	{
-		// TODO Auto-generated method stub
-		return false;
 	}
 }

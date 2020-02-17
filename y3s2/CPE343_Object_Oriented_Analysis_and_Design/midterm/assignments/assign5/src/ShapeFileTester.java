@@ -34,6 +34,12 @@ public class ShapeFileTester
 		FigureViewer viewer = new FigureViewer();
 		viewer.pack();
 		viewer.setVisible(true);
+		try
+		{
+			Thread.sleep(1000);
+		} catch (InterruptedException ie)
+		{
+		}
 		AbstractShape nextShape = reader.readShape();
 		while (nextShape != null)
 		{
