@@ -12,15 +12,14 @@ public class Player
 		this.name = name;
 	}
 
-	public static void main(String[] args)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
 	public boolean selectTiles(int howMany)
 	{
-		return false;
+		for (int i = 0; i < howMany; i++)
+		{
+			TileManager tileManager = TileManager.getInstance();
+			tileManager.selectRandomTile();
+		}
+		return true;
 	}
 
 	public String getName()
@@ -35,11 +34,19 @@ public class Player
 
 	public void updateScore(int points)
 	{
-
+		this.score = this.score + points;
 	}
 
 	public void printTiles()
 	{
 
+	}
+
+	public static void main(String[] args)
+	{
+		TileCollection playerTileCollection = new TileCollection(0, 100);
+		Player player1 = new Player("tong");
+		TileManager tileManager = TileManager.getInstance();
+		player1.selectTiles(5);
 	}
 }

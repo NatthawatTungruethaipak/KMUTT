@@ -1,17 +1,25 @@
 
 public class TileManager
 {
-	private TileCollection tiles;
+	private TileCollection tiles = new TileCollection(0, 100);
 
-	public static void main(String[] args)
+	private static TileManager instance;
+
+	private TileManager()
 	{
-		// TODO Auto-generated method stub
 
+	}
+
+	public static TileManager getInstance()
+	{
+		if (instance == null)
+			instance = new TileManager();
+		return instance;
 	}
 
 	public Tile selectRandomTile()
 	{
-		return null;
+		return tiles.getRandom();
 
 	}
 }
