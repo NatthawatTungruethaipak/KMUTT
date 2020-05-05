@@ -1,0 +1,65 @@
+import java.util.*;
+
+public class UserManager
+{
+
+	private static UserManager userManager;
+
+	private ArrayList<User> userList;
+
+	public UserManager()
+	{
+
+	}
+
+	public static UserManager getSingletonInstance()
+	{
+		return userManager;
+	}
+
+	public void initialUser(ArrayList<User> userList)
+	{
+		userList = new ArrayList<User>();
+	}
+
+	public User findUserByUsername(String username)
+	{
+		int count = 0;
+		User findUser;
+		while (userList.size() > count)
+		{
+			findUser = userList.get(count);
+			if(findUser.getUsername().equals(username)) {
+				return findUser;
+			}
+			count++;
+		}
+		return null;
+	}
+
+	public User findUserByName(String name)
+	{
+		int count = 0;
+		User findUser;
+		while (userList.size() > count)
+		{
+			findUser = userList.get(count);
+			if(findUser.getName().equals(name)) {
+				return findUser;
+			}
+			count++;
+		}
+		return null;
+	}
+
+	public boolean addUser(User user)
+	{
+		userList.add(user);
+		return true;
+	}
+
+	public static void main(String args[])
+	{
+
+	}
+}

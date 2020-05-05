@@ -1,0 +1,39 @@
+import java.util.*;
+
+public class UserManager
+{
+
+	private static UserManager userManager;
+
+	private ArrayList<User> userList;
+
+	public UserManager()
+	{
+
+	}
+
+	public static UserManager getSingletonInstance()
+	{
+		return userManager;
+	}
+
+	public void initialUser(ArrayList<User> userList)
+	{
+		
+	}
+
+	public User findUserByUsername(String username)
+	{
+		return null;
+	}
+
+	public User findUserByName()
+	{
+		return null;
+	}
+
+	public boolean addUser()
+	{
+		return true;
+	}
+}

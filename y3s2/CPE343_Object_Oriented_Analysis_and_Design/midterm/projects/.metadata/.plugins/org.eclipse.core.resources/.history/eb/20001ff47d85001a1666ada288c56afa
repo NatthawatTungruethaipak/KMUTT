@@ -1,0 +1,92 @@
+import java.util.*;
+
+/**
+ * Represent the user manager object in auction program. Contain the user manager detail.
+ * 
+ * Created by Kla & Tong 23 April 2020
+ */
+public class UserManager
+{
+	/**
+	 * UserManager that will be Singleton to control user
+	 */
+	private static UserManager userManager = null;
+
+	/**
+	 * List of user
+	 */
+	private ArrayList<User> userList;
+
+	/**
+	 * Constructor of UserManager class for future add-on
+	 */
+	public UserManager()
+	{
+
+	}
+
+	/**
+	 * 
+	 */
+	public static UserManager getSingletonInstance()
+	{
+		if (userManager == null)
+			userManager = new UserManager();
+		return userManager;
+	}
+
+	/**
+	 * 
+	 */
+	public void initialUser(ArrayList<User> userList)
+	{
+		userList = new ArrayList<User>();
+	}
+
+	/**
+	 * 
+	 */
+	public User findUserByUsername(String username)
+	{
+		int count = 0;
+		User findUser;
+		while (userList.size() > count)
+		{
+			findUser = userList.get(count);
+			if (findUser.getUsername().equals(username))
+			{
+				return findUser;
+			}
+			count++;
+		}
+		return null;
+	}
+
+	/**
+	 * 
+	 */
+	public User findUserByName(String name)
+	{
+		int count = 0;
+		User findUser;
+		while (userList.size() > count)
+		{
+			findUser = userList.get(count);
+			if (findUser.getName().equals(name))
+			{
+				return findUser;
+			}
+			count++;
+		}
+		return null;
+	}
+
+	/**
+	 * 
+	 */
+	public boolean addUser(User user)
+	{
+		userList.add(user);
+		return true;
+	}
+}

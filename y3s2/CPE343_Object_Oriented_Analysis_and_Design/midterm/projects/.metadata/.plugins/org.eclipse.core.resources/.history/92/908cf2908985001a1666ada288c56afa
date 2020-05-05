@@ -1,0 +1,30 @@
+import java.util.Date;
+
+public class IOUtils {
+
+	public static Date getCurrentDateTime()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public static int compareDateTime(Date date1, Date date2) {
+		return 0;
+	}
+	
+	public static Date diffDateTime(Date date1, Date date2) {
+		return date2;
+	}
+	
+	public static boolean validateDateTime(String date) {
+		return false;
+		
+	}
+	public static boolean validateUsername(String username) {
+		return false;
+		
+	}
+	public static boolean validatePassword(String password) {
+		
+	}
+}
